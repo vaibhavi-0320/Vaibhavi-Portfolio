@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #000000;
+  --color-grey: #6e6e6e;
+  --color-hairline: #ececec;
+  --color-charcoal: #0e0e0e;
+  --color-soft: #a3a3a3;
+  --color-label: #767676;
+  --color-body: #5c5c5c;
+  /* The one accent, used sparingly on the Inkbyte page. */
+  --color-accent: #455ce9;
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-dm: "DM Sans Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-script: "Playball", "Times New Roman", serif;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* The Figma frames are 1920 wide. From laptop width up, 1rem is 1/120 of the
+     viewport, so a rem value is the Figma px value divided by 16 and the whole
+     layout scales with the window. Below that the layouts are fluid. */
+  @media (min-width: 1280px) {
+    html {
+      font-size: calc(min(100vw, 2560px) / 120);
+    }
+  }
+
+  body {
+    margin: 0;
+    background-color: #fff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: #000;
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
+/* DM Sans is set at the optical size used in every Figma text layer. */
+@utility font-dm {
+  font-family: var(--font-dm);
+  font-variation-settings: "opsz" 14;
+}
+
+/* One script word inside a sans heading. Playball runs small, so it is scaled up. */
+@utility script-word {
+  font-family: var(--font-script);
+  font-weight: 400;
+  font-size: 1.14em;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* The word is traced in outline, then the fill comes in behind it. */
+@keyframes loader-trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes loader-fill {
+  to {
+    fill-opacity: 1;
+  }
+}
+
+.loader-word {
+  fill: #fff;
+  fill-opacity: 0;
+  stroke: #fff;
+  stroke-width: 1;
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation:
+    loader-trace 2.8s cubic-bezier(0.45, 0, 0.3, 1) forwards,
+    loader-fill 1s ease-out 2.1s forwards;
+}
+
+.loader-meta {
+  opacity: 0;
+  transition: opacity 1.4s ease-out;
+}
+
+.loader-meta.is-on {
+  opacity: 1;
+}
+
+/* The site waits one screen below the loader, then travels up with it. The
+   timing matches the loader in Loader.tsx. */
+html[data-intro="wait"] main,
+html[data-intro="wait"] body > #root > header {
+  transform: translateY(100svh);
+}
+
+html[data-intro="go"] main,
+html[data-intro="go"] body > #root > header {
+  transform: translateY(0);
+  transition: transform 1.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Inkbyte: a slow float, a blink every few seconds, and the chat's thinking dots. */
+@keyframes inkbyte-float {
+  50% {
+    transform: translateY(-3%);
+  }
+}
+
+.inkbyte-float {
+  animation: inkbyte-float 4.5s ease-in-out infinite;
+}
+
+@keyframes inkbyte-blink {
+  0%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  94%,
+  97% {
+    opacity: 1;
+  }
+}
+
+.inkbyte-blink {
+  opacity: 0;
+  animation: inkbyte-blink 5.2s steps(1, end) infinite;
+}
+
+@keyframes inkbyte-dot {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.inkbyte-dot {
+  animation: inkbyte-dot 0.9s ease-in-out infinite;
+}
+
+@keyframes heart-beat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.18);
+  }
+  28% {
+    transform: scale(1.08);
+  }
+}
+
+.heart-beat {
+  animation: heart-beat 1.8s ease-out infinite;
+}
+
+/* A short blue pulse travels along each line from the octopus to a heart. */
+@keyframes heart-pulse {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+.heart-pulse {
+  stroke-dasharray: 14 100;
+  animation: heart-pulse 1.8s ease-in infinite;
+}
+
+@keyframes line-flow {
+  to {
+    stroke-dashoffset: -8;
+  }
+}
+
+.line-flow {
+  animation: line-flow 1.2s linear infinite;
+}
+
+/* The track holds two copies of its children, so -50% lands exactly on the
+   start of the second copy and the loop is seamless. */
+@keyframes marquee-slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation-name: marquee-slide;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* No fill-mode: if the animation never runs the page stays fully visible,
+   rather than being pinned at the 0-opacity start frame. */
+@utility page-enter {
+  animation: page-enter 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
